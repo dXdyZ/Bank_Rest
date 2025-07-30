@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-user
+      author: Ilyin_Timur
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: username
+                  type: varchar(200)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(150)
+                  constraints:
+                    nullable: false
