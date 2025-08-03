@@ -3,12 +3,11 @@ package com.example.bank_rest_test_task.service;
 import com.example.bank_rest_test_task.dto.PaymentDto;
 import com.example.bank_rest_test_task.entity.Card;
 import com.example.bank_rest_test_task.entity.StatusCard;
+import com.example.bank_rest_test_task.entity.TransferHistory;
 import com.example.bank_rest_test_task.exception.CardBlockedException;
 import com.example.bank_rest_test_task.exception.InsufficientFundsException;
-import com.example.bank_rest_test_task.exception.InvalidAmountException;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PaymentService {
@@ -20,6 +19,7 @@ public class PaymentService {
         this.cardService = cardService;
     }
 
+    @Transactional
     public void transferMoney(PaymentDto paymentDto, String username) {
         Card fromCard = cardService.findCardByUsernameAndCardId(paymentDto.fromCardId(), username);
         Card toCard = cardService.findCardByUsernameAndCardId(paymentDto.toCardId(), username);
@@ -33,7 +33,15 @@ public class PaymentService {
         fromCard.setBalance(fromCard.getBalance().subtract(paymentDto.amount()));
         toCard.setBalance(toCard.getBalance().add(paymentDto.amount()));
 
-
+        transferHistoryService.saveTransferHistory(TransferHistory.builder()
+                        .fromCard(fromCard)
+                        .toCard(toCard)
+                        .amount(paymentDto.amount())
+                        .user(fromCard.getUser())
+                        .comment(paymentDto.comment())
+                .build());
+        cardService.saveCard(fromCard);
+        cardService.saveCard(toCard);
     }
 
     private void chekCard(Card fromCard, Card toCard) {

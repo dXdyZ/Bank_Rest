@@ -1,0 +1,68 @@
+package com.example.bank_rest_test_task.security.jwt;
+
+import com.example.bank_rest_test_task.exception.InvalidJwtTokenException;
+import com.example.bank_rest_test_task.security.CustomUserDetailsService;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+import java.security.KeyPair;
+import java.util.Date;
+
+@Component
+public class JwtUtils {
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtKeyConfiguration jwtKeyConfiguration;
+    private final KeyPair keyPair;
+
+    public JwtUtils(CustomUserDetailsService customUserDetailsService, JwtKeyConfiguration jwtKeyConfiguration, KeyPair keyPair) {
+        this.customUserDetailsService = customUserDetailsService;
+        this.jwtKeyConfiguration = jwtKeyConfiguration;
+        this.keyPair = keyPair;
+    }
+
+    public String generationAccessToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .claim("role", userDetails.getAuthorities().stream().findFirst())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + jwtKeyConfiguration.getAccessExpiration()))
+                .signWith(keyPair.getPrivate())
+                .compact();
+    }
+
+    public String generationRefreshToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + jwtKeyConfiguration.getRefreshExpiration()))
+                .signWith(keyPair.getPrivate())
+                .compact();
+    }
+
+    public boolean validationToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(keyPair.getPublic())
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public String extractUsername(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(keyPair.getPublic())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getSubject();
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new InvalidJwtTokenException("Invalid or expired JWT token");
+        }
+    }
+}

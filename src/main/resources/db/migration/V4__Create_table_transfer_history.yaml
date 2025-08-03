@@ -45,6 +45,3 @@ databaseChangeLog:
               - column:
                   name: comment
                   type: text
-              - column:
-                  name: status
-                  type: varchar(20)

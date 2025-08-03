@@ -41,8 +41,4 @@ public class TransferHistory {
 
     @Column(name = "comment")
     private String comment;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private TransferStatus status;
 }

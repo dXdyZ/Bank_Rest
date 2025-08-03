@@ -7,9 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Entity
@@ -28,16 +26,19 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Builder.Default
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles = new HashSet<>();
+    @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
 
     @Builder.Default
     @OneToMany(mappedBy = "user")
     private List<Card> cards = new ArrayList<>();
+
+    @Builder.Default
+    @Column(name = "account_enable")
+    private Boolean accountEnable = true;
+
+    @Builder.Default
+    @Column(name = "account_locked")
+    private Boolean accountLocked = false;
 }

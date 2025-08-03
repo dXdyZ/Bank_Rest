@@ -13,12 +13,27 @@ databaseChangeLog:
                     primaryKey: true
               - column:
                   name: username
-                  type: varchar(200)
+                  type: varchar(50)
                   constraints:
                     nullable: false
                     unique: true
               - column:
                   name: password
                   type: varchar(150)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(25)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_enable
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_locked
+                  type: boolean
                   constraints:
                     nullable: false

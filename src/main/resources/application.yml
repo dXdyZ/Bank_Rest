@@ -2,11 +2,11 @@ spring:
   application:
     name: Bank_REST_Test_Task
   liquibase:
-    change-log: classpath:/db/changelog/db.changelog-master.yaml
+    change-log: classpath:db/migration/db.changelog-master.yaml
     enabled: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/bank
-    username: user
+    url: "${DB_URL}"
+    username: "${DB_USER}"
     password: "${DB_PASSWORD}"
     driver-class-name: org.postgresql.Driver
 jasypt:
@@ -17,3 +17,10 @@ payment:
   card:
     tokenization:
       hash-key: "${HASH_SECRET_KEY}"
+jwt:
+  access:
+    expiration: 3600000
+  refresh:
+    expiration: 1209600000
+  keys:
+    path: "${JWT_DIRECTORY_PATH}"

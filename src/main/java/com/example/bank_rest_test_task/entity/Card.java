@@ -33,7 +33,7 @@ public class Card {
     @Column(name = "balance", nullable = false)
     private BigDecimal balance;
 
-    @Column(name = "search_hash")
+    @Column(name = "search_hash", nullable = false)
     private String searchHash;
 
     @ManyToOne
