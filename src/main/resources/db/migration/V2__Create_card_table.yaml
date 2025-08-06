@@ -12,7 +12,7 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
               - column:
-                  name: encryptedNumber
+                  name: encrypted_number
                   type: varchar
                   constraints:
                     unique: true
@@ -29,6 +29,12 @@ databaseChangeLog:
                   type: varchar(20)
                   constraints:
                     nullable: false
+              - column:
+                  name: balance
+                  type: numeric(19, 4)
+                  constraints:
+                    nullable: false
+                  defaultValueNumeric: 0
               - column:
                   name: user_id
                   type: bigint

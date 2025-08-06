@@ -9,6 +9,8 @@ import com.example.bank_rest_test_task.exception.InsufficientFundsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class PaymentService {
     private final TransferHistoryService transferHistoryService;
@@ -20,9 +22,9 @@ public class PaymentService {
     }
 
     @Transactional
-    public void transferMoney(PaymentDto paymentDto, String username) {
-        Card fromCard = cardService.findCardByUsernameAndCardId(paymentDto.fromCardId(), username);
-        Card toCard = cardService.findCardByUsernameAndCardId(paymentDto.toCardId(), username);
+    public List<Card> transferMoney(PaymentDto paymentDto, Long userId) {
+        Card fromCard = cardService.findCardByUserIdAndCardId(paymentDto.fromCardId(), userId);
+        Card toCard = cardService.findCardByUserIdAndCardId(paymentDto.toCardId(), userId);
 
         chekCard(fromCard, toCard);
 
@@ -42,20 +44,21 @@ public class PaymentService {
                 .build());
         cardService.saveCard(fromCard);
         cardService.saveCard(toCard);
+        return List.of(fromCard, toCard);
     }
 
     private void chekCard(Card fromCard, Card toCard) {
         if (fromCard.getStatusCard().equals(StatusCard.BLOCKED)){
-            throw new CardBlockedException("Card: %s is blocked for operation".formatted(fromCard));
+            throw new CardBlockedException("Card by id: %s is blocked for operation".formatted(fromCard.getId()));
         }
         if (toCard.getStatusCard().equals(StatusCard.BLOCKED)) {
-            throw new CardBlockedException("Card: %s is blocked for operation".formatted(toCard));
+            throw new CardBlockedException("Card by id: %s is blocked for operation".formatted(toCard.getId()));
         }
         if (fromCard.getStatusCard().equals(StatusCard.EXPIRED)) {
-            throw new CardBlockedException("Card: %s has expired".formatted(fromCard));
+            throw new CardBlockedException("Card by id: %s has expired".formatted(fromCard.getId()));
         }
         if (toCard.getStatusCard().equals(StatusCard.EXPIRED)) {
-            throw new CardBlockedException("Card: %s has expired".formatted(toCard));
+            throw new CardBlockedException("Card by id: %s has expired".formatted(toCard.getId()));
         }
     }
 }

@@ -20,7 +20,7 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "card_number", unique = true)
+    @Column(name = "encrypted_number", unique = true)
     private String encryptNumber;
 
     @Column(name = "validity_period", nullable = false)
@@ -30,8 +30,9 @@ public class Card {
     @Column(name = "status_card", nullable = false)
     private StatusCard statusCard;
 
+    @Builder.Default
     @Column(name = "balance", nullable = false)
-    private BigDecimal balance;
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(name = "search_hash", nullable = false)
     private String searchHash;

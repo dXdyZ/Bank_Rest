@@ -24,11 +24,19 @@ public class CustomUserDetailsService implements UserDetailsService {
                 () -> new UsernameNotFoundException("User not found"));
 
         return new CustomUserDetails(
+                user.getId(),
                 user.getUsername(),
                 user.getPassword(),
                 List.of(new SimpleGrantedAuthority(user.getRole().name())),
                 user.getAccountEnable(),
                 user.getAccountLocked()
         );
+    }
+
+    public CustomUserDetails getCustomUserDetails(UserDetails userDetails) {
+        if (!(userDetails instanceof CustomUserDetails customUserDetails)) {
+            throw new IllegalArgumentException("UserDetails must be an instance of CustomUserDetails");
+        }
+        return customUserDetails;
     }
 }

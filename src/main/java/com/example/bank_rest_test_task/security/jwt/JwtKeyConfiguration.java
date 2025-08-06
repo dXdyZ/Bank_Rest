@@ -38,8 +38,8 @@ public class JwtKeyConfiguration {
     
     @PostConstruct
     public void checkKeys() {
-        Path privateKeyPath = Paths.get(keyPath, "private-key.txt");
-        Path publicKeyPath = Paths.get(keyPath, "public-key.txt");
+        Path privateKeyPath = Paths.get(keyPath, "private-key.pem");
+        Path publicKeyPath = Paths.get(keyPath, "public-key.pem");
 
         if (!Files.exists(privateKeyPath) || !Files.isReadable(privateKeyPath) ||
                 !Files.exists(publicKeyPath) || !Files.isReadable(publicKeyPath)) {
@@ -53,8 +53,15 @@ public class JwtKeyConfiguration {
 
     @Bean
     public KeyPair keyPair() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        String privateKeyPEM = new String(Files.readAllBytes(Paths.get(keyPath, "private-key.txt"))).trim();
-        String publicKeyPEM = new String(Files.readAllBytes(Paths.get(keyPath, "public-key.txt"))).trim();
+        String privateKeyPEM = new String(Files.readAllBytes(Paths.get(keyPath, "private-key.pem")))
+                .replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s", "");
+
+        String publicKeyPEM = new String(Files.readAllBytes(Paths.get(keyPath, "public-key.pem")))
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
+                .replaceAll("\\s", "");
 
         byte[] privateKeyBytes = Base64.getDecoder().decode(privateKeyPEM);
         byte[] publicKeyBytes = Base64.getDecoder().decode(publicKeyPEM);

@@ -1,11 +1,15 @@
 package com.example.bank_rest_test_task.security;
 
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
 public class CustomUserDetails implements UserDetails {
+
+    @Getter
+    private final Long userId;
 
     public final String username;
     public final String password;
@@ -15,7 +19,8 @@ public class CustomUserDetails implements UserDetails {
     private final Boolean accountEnable;
     private final Boolean accountLocked;
 
-    public CustomUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities, Boolean accountEnable, Boolean accountLocked) {
+    public CustomUserDetails(Long userId, String username, String password, Collection<? extends GrantedAuthority> authorities, Boolean accountEnable, Boolean accountLocked) {
+        this.userId = userId;
         this.username = username;
         this.password = password;
         this.authorities = authorities;
@@ -46,7 +51,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return accountLocked;
+        return !accountLocked;
     }
 
     @Override
@@ -58,4 +63,5 @@ public class CustomUserDetails implements UserDetails {
     public boolean isEnabled() {
         return accountEnable;
     }
+
 }

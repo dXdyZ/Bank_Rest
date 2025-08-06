@@ -3,7 +3,6 @@ package com.example.bank_rest_test_task.service;
 import com.example.bank_rest_test_task.dto.CreateCardBlockRequestDto;
 import com.example.bank_rest_test_task.entity.*;
 import com.example.bank_rest_test_task.exception.BlockRequestNotFoundException;
-import com.example.bank_rest_test_task.exception.CardBlockRequestNotFoundException;
 import com.example.bank_rest_test_task.exception.CardBlockedException;
 import com.example.bank_rest_test_task.exception.CardNotFoundException;
 import com.example.bank_rest_test_task.repository.CardBlockRequestRepository;
@@ -31,10 +30,10 @@ public class CardBlockRequestService {
     }
 
     @Transactional
-    public void createRequest(CreateCardBlockRequestDto createCardBlockRequestDto, String username)
+    public void createBlockRequest(CreateCardBlockRequestDto createCardBlockRequestDto, Long userId)
             throws CardNotFoundException {
 
-        Card card = cardService.findCardByUsernameAndCardId(createCardBlockRequestDto.cardId(), username);
+        Card card = cardService.findCardByUserIdAndCardId(createCardBlockRequestDto.cardId(), userId);
 
         if (card.getStatusCard() == StatusCard.BLOCKED) {
             throw new CardBlockedException("You cannot block an inactive card");
@@ -52,10 +51,11 @@ public class CardBlockRequestService {
     }
 
     @Transactional
-    public void processRequest(Long requestId, BlockRequestStatus status, String adminUsername) {
+    public void processBlockRequest(Long requestId, BlockRequestStatus status, Long adminId) {
         CardBlockRequest request = cardBlockRequestRepository.findById(requestId).orElseThrow(
                 () -> new BlockRequestNotFoundException("Request to block by id: %s not found".formatted(requestId)));
-        User admin = userService.findUserByUsername(adminUsername);
+
+        User admin = userService.findUserById(adminId);
 
         if (status == BlockRequestStatus.APPROVED) {
             cardService.updateCardStatus(request.getCard().getId(), StatusCard.BLOCKED);
@@ -89,7 +89,7 @@ public class CardBlockRequestService {
 
     public CardBlockRequest findCardBlockRequestById(Long id) {
         return cardBlockRequestRepository.findById(id).orElseThrow(
-                () -> new CardBlockRequestNotFoundException("Request for blocking by id: %s not found".formatted(id)));
+                () -> new BlockRequestNotFoundException("Request for blocking by id: %s not found".formatted(id)));
     }
 
     public Page<CardBlockRequest> findCardBlockRequestByProcessed(Long processedId, Pageable pageable) {

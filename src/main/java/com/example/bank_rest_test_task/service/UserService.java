@@ -4,7 +4,6 @@ import com.example.bank_rest_test_task.dto.UserRegisterDto;
 import com.example.bank_rest_test_task.entity.User;
 import com.example.bank_rest_test_task.entity.UserRole;
 import com.example.bank_rest_test_task.exception.DuplicateUserException;
-import com.example.bank_rest_test_task.exception.RoleNotFoundException;
 import com.example.bank_rest_test_task.exception.UserNotFoundException;
 import com.example.bank_rest_test_task.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,26 +50,27 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUsername(String newUsername, Long userId) {
+    public User updateUsername(String newUsername, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User by id: %s not found".formatted(userId)));
         if (userRepository.existsByUsername(newUsername)) {
             throw new DuplicateUserException("User by name: %s already exists".formatted(newUsername));
         }
         user.setUsername(newUsername);
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     @Transactional
-    public void updateRole(String roleName, Long userId) {
-        String modRole = "ROLE_" + roleName;
+    public User updateRole(String roleName, Long userId) {
+        String modRole = "ROLE_" + roleName.toUpperCase();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User by id: %s not found".formatted(userId)));
         user.setRole(UserRole.valueOf(modRole));
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
-    public void registrationUser(UserRegisterDto userRegisterDto) throws RoleNotFoundException {
+    @Transactional
+    public void registrationUser(UserRegisterDto userRegisterDto) {
         if (userRepository.existsByUsername(userRegisterDto.username())) {
             throw new DuplicateUserException("User by name: %s already exists".formatted(userRegisterDto.username()));
         }
@@ -79,5 +79,10 @@ public class UserService {
                 .password(passwordEncoder.encode(userRegisterDto.password()))
                 .role(UserRole.ROLE_USER)
                 .build());
+    }
+
+    public User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User by id: %s not found".formatted(id)));
     }
 }

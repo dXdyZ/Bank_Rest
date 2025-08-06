@@ -4,6 +4,7 @@ import com.example.bank_rest_test_task.dto.CardCreateDto;
 import com.example.bank_rest_test_task.entity.Card;
 import com.example.bank_rest_test_task.entity.StatusCard;
 import com.example.bank_rest_test_task.entity.User;
+import com.example.bank_rest_test_task.exception.CardDuplicateException;
 import com.example.bank_rest_test_task.exception.CardNotFoundException;
 import com.example.bank_rest_test_task.exception.UserNotFoundException;
 import com.example.bank_rest_test_task.repository.CardRepository;
@@ -28,8 +29,11 @@ public class CardService {
     }
 
     @Transactional
-    public void createCard(CardCreateDto cardCreateDto, String username) throws UserNotFoundException {
-        User user = userService.findUserByUsername(username);
+    public void createCard(CardCreateDto cardCreateDto) throws UserNotFoundException {
+        User user = userService.findUserById(cardCreateDto.userId());
+        if (cardRepository.existsBySearchHash(cryptoService.calculationCardHash(cardCreateDto.cardNumber()))) {
+            throw new CardDuplicateException("Card by number: %s already exists".formatted(cardCreateDto.cardNumber()));
+        }
         Card card = Card.builder()
                 .encryptNumber(cryptoService.encrypt(cardCreateDto.cardNumber()))
                 .user(user)
@@ -39,20 +43,24 @@ public class CardService {
         cardRepository.save(card);
     }
 
-    public Page<Card> getUserCardsPaginated(String username, Pageable pageable) {
-        return cardRepository.findByUser_Username(username, pageable);
+    public Boolean existsCardByNumber(String cardNumber) {
+        return cardRepository.existsBySearchHash(cryptoService.calculationCardHash(cardNumber));
     }
 
-    public Card findCardByUsernameAndCardId(Long cardId, String username) {
-        return cardRepository.findByIdAndUser_Username(cardId, username).orElseThrow(
-                () -> new CardNotFoundException("Card by id: %s not found for user %s".formatted(cardId, username))
+    public Page<Card> getUserCardsPaginated(Long userId, Pageable pageable) {
+        return cardRepository.findByUser_Id(userId, pageable);
+    }
+
+    public Card findCardByUserIdAndCardId(Long cardId, Long userId) {
+        return cardRepository.findByIdAndUser_id(cardId, userId).orElseThrow(
+                () -> new CardNotFoundException("Card by id: %s not found for user %s".formatted(cardId, userId))
         );
     }
 
-    public Card findCardByCardNumberAndUsername(String username, String cardNumber) {
-        return cardRepository.findByEncryptNumberAndUser_Username(cryptoService.calculationCardHash(cardNumber), username)
+    public Card findCardByCardNumberAndUserId(Long userId, String cardNumber) {
+        return cardRepository.findByEncryptNumberAndUser_Id(cryptoService.calculationCardHash(cardNumber), userId)
                 .orElseThrow(() -> new CardNotFoundException("Card: %s not found for user %s".formatted(
-                        CardFormattedService.formatedMaskedCard(cardNumber), username)));
+                        CardFormattedService.formatedMaskedCard(cardNumber), userId)));
     }
 
     public Card findCardByNumber(String cardNumber) {
@@ -65,12 +73,17 @@ public class CardService {
         cardRepository.save(card);
     }
 
+    public Card findCardById(Long id) {
+        return cardRepository.findById(id).orElseThrow(
+                () -> new CardNotFoundException("Card by id: %s not found".formatted(id)));
+    }
+
     @Transactional
-    public void updateCardStatus(Long cardId, StatusCard newStatusCard) {
+    public Card updateCardStatus(Long cardId, StatusCard newStatusCard) {
         Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new CardNotFoundException("Card by id: %s not found".formatted(cardId)));
         card.setStatusCard(newStatusCard);
-        cardRepository.save(card);
+        return cardRepository.save(card);
     }
 
     @Transactional
@@ -86,6 +99,11 @@ public class CardService {
                 .orElseThrow(() -> new CardNotFoundException("Card by id: %s not found".formatted(cardNumber)));
         cardRepository.delete(card);
     }
+
+    public Page<Card> findCardsByUsername(String username, Pageable pageable) {
+        return cardRepository.findByUser_Username(username, pageable);
+    }
+
 }
 
 

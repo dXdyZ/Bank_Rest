@@ -2,25 +2,57 @@ spring:
   application:
     name: Bank_REST_Test_Task
   liquibase:
-    change-log: classpath:db/migration/db.changelog-master.yaml
+    change-log: classpath:db/db.changelog-master.yaml
     enabled: true
   datasource:
-    url: "${DB_URL}"
-    username: "${DB_USER}"
-    password: "${DB_PASSWORD}"
+    url: jdbc:postgresql://localhost:5432/bank
+    username: user
+    password: user
     driver-class-name: org.postgresql.Driver
 jasypt:
   encryptor:
-    password: "${SECRET_CARD_NUMBER_KEY}"
+    password: 1b23c9652fd6e730365c4c83fb5e994670f8f9a8547a22c5c7dd01981bafbb57
     algorithm: PBEWITHHMACSHA512ANDAES_256
 payment:
   card:
     tokenization:
-      hash-key: "${HASH_SECRET_KEY}"
+      hash-key: c507ae74b9a62b8940796d7e43035b7d23b9e9bb7517975fbfed372527697dc5
 jwt:
   access:
     expiration: 3600000
   refresh:
     expiration: 1209600000
   keys:
-    path: "${JWT_DIRECTORY_PATH}"
+    path: /home/another/Project/developering/Bank_REST_Test_Task/src/main/resources/jwt
+
+logging:
+  level:
+    org.springframework.security: debug
+    org.springframework.web: debug
+
+#spring:
+#  application:
+#    name: Bank_REST_Test_Task
+#  liquibase:
+#    change-log: classpath:db/db.changelog-master.yaml
+#    enabled: true
+#  datasource:
+#    url: "${DB_URL}"
+#    username: "${DB_USER}"
+#    password: "${DB_PASSWORD}"
+#    driver-class-name: org.postgresql.Driver
+#jasypt:
+#  encryptor:
+#    password: "${SECRET_CARD_NUMBER_KEY}"
+#    algorithm: PBEWITHHMACSHA512ANDAES_256
+#payment:
+#  card:
+#    tokenization:
+#      hash-key: "${HASH_SECRET_KEY}"
+#jwt:
+#  access:
+#    expiration: 3600000
+#  refresh:
+#    expiration: 1209600000
+#  keys:
+#    path: "${JWT_DIRECTORY_PATH}"

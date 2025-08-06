@@ -1,11 +1,11 @@
 databaseChangeLog:
   - include:
-      file: db/migration/V1__Create_role_table.yaml
+      file: db/migration/V1__Create_user_table.yaml
   - include:
-      file: db/migration/V2__Create_user_table.yaml
+      file: db/migration/V2__Create_card_table.yaml
   - include:
-      file: db/migration/V3__Create_card_table.yaml
+      file: db/migration/V3__Create_table_transfer_history.yaml
   - include:
-      file: db/migration/V4__Create_table_transfer_history.yaml
+      file: db/migration/V4__Create_table_card_block_request.yaml
   - include:
-      file: db/migration/V5__Create_table_card_block_request.yaml
+      file: db/migration/V5__Insert_admin_user.yaml

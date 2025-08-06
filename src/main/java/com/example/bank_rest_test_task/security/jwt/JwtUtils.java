@@ -4,11 +4,14 @@ import com.example.bank_rest_test_task.exception.InvalidJwtTokenException;
 import com.example.bank_rest_test_task.security.CustomUserDetailsService;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.KeyPair;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtils {
@@ -23,9 +26,13 @@ public class JwtUtils {
     }
 
     public String generationAccessToken(UserDetails userDetails) {
+        List<String> authorities = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
         return Jwts.builder()
-                .subject(userDetails.getUsername())
-                .claim("role", userDetails.getAuthorities().stream().findFirst())
+                .subject(customUserDetailsService.getCustomUserDetails(userDetails).getUserId().toString())
+                .claim("authorities", authorities)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtKeyConfiguration.getAccessExpiration()))
                 .signWith(keyPair.getPrivate())
@@ -34,7 +41,7 @@ public class JwtUtils {
 
     public String generationRefreshToken(UserDetails userDetails) {
         return Jwts.builder()
-                .subject(userDetails.getUsername())
+                .subject(customUserDetailsService.getCustomUserDetails(userDetails).getUserId().toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtKeyConfiguration.getRefreshExpiration()))
                 .signWith(keyPair.getPrivate())
@@ -53,7 +60,7 @@ public class JwtUtils {
         }
     }
 
-    public String extractUsername(String token) {
+    public String extractUserId(String token) {
         try {
             return Jwts.parser()
                     .verifyWith(keyPair.getPublic())
