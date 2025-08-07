@@ -48,7 +48,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/v3/api-docs.yaml",
                                 "/swagger-resources/**",
-                                "/webjars/**").permitAll()
+                                "/webjars/**",
+                                "/error").permitAll()
                         .requestMatchers("/admin/cards/**").hasRole("ADMIN")
                         .requestMatchers("/users/**").hasRole("ADMIN")
                         .requestMatchers("/blocks/process", "/blocks/filter", "/blocks/processed-by/**", "/blocks/{id}").hasRole("ADMIN")
