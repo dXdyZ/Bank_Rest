@@ -1,11 +1,13 @@
 package com.example.bank_rest_test_task.controller;
 
+import com.example.bank_rest_test_task.controller.documentation.AdminCardControllerDocs;
 import com.example.bank_rest_test_task.dto.CardCreateDto;
 import com.example.bank_rest_test_task.dto.CardDto;
 import com.example.bank_rest_test_task.dto.UpdateStatusCardDto;
 import com.example.bank_rest_test_task.service.CardService;
 import com.example.bank_rest_test_task.util.factory.CardDtoFactory;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.CreditCardNumber;
@@ -20,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @RestController
 @RequestMapping("/admin/cards")
-public class AdminCardController {
+public class AdminCardController implements AdminCardControllerDocs {
     private final CardService cardService;
     private final CardDtoFactory cardDtoFactory;
 
@@ -29,10 +31,9 @@ public class AdminCardController {
         this.cardDtoFactory = cardDtoFactory;
     }
 
-    @PostMapping("/{id}")
+    @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public void createCard(@Positive(message = "Id must not be less than zero") @PathVariable Long id,
-                           @Valid @RequestBody CardCreateDto cardCreateDto) {
+    public void createCard(@Valid @RequestBody CardCreateDto cardCreateDto) {
         cardService.createCard(cardCreateDto);
     }
 
@@ -43,12 +44,12 @@ public class AdminCardController {
 
     @GetMapping("/user/{id}")
     public ResponseEntity<Page<CardDto>> getUserCards(@Positive(message = "Id must not be less than zero") @PathVariable Long id,
-                                                      @PageableDefault(size = 6) Pageable pageable) {
+                                                      @PageableDefault(size = 6, sort = "validityPeriod") Pageable pageable) {
         return ResponseEntity.ok(
                 cardService.getUserCardsPaginated(id, pageable).map(cardDtoFactory::createCardDtoForAdmin));
     }
 
-    @GetMapping("/by-number/")
+    @GetMapping("/by-number")
     public ResponseEntity<CardDto> getCardByCardNumber(@CreditCardNumber @RequestParam("number") String number) {
         return ResponseEntity.ok(cardDtoFactory.createCardDtoForAdmin(cardService.findCardByNumber(number)));
     }
@@ -66,10 +67,21 @@ public class AdminCardController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/by-number/")
+    @DeleteMapping("/by-number")
     public ResponseEntity<?> deleteCardByCardNumber(@CreditCardNumber @RequestParam("number") String number) {
         cardService.deleteCardByCardNumber(number);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/by-username")
+    public ResponseEntity<Page<CardDto>> getCardsByUserName(@NotBlank(message = "Username must be not empty") @RequestParam String username,
+                                                            @PageableDefault(size = 6, sort = "validityPeriod") Pageable pageable) {
+        return ResponseEntity.ok(cardService.findCardsByUsername(username, pageable).map(cardDtoFactory::createCardDtoForAdmin));
+    }
+
+    @GetMapping()
+    public ResponseEntity<Page<CardDto>> getAllCards(@PageableDefault(size = 6, sort = "validityPeriod") Pageable pageable) {
+        return ResponseEntity.ok(cardService.findAllCards(pageable).map(cardDtoFactory::createCardDtoForAdmin));
     }
 }
 

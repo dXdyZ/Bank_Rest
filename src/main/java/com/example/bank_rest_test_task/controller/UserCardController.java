@@ -1,6 +1,8 @@
 package com.example.bank_rest_test_task.controller;
 
+import com.example.bank_rest_test_task.controller.documentation.UserCardControllerDocs;
 import com.example.bank_rest_test_task.dto.CardDto;
+import com.example.bank_rest_test_task.security.CustomUserDetails;
 import com.example.bank_rest_test_task.service.CardService;
 import com.example.bank_rest_test_task.util.factory.CardDtoFactory;
 import org.hibernate.validator.constraints.CreditCardNumber;
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @RestController
 @RequestMapping("/cards")
-public class UserCardController {
+public class UserCardController implements UserCardControllerDocs {
     private final CardService cardService;
     private final CardDtoFactory cardDtoFactory;
 
@@ -34,18 +36,10 @@ public class UserCardController {
 
     @GetMapping()
     public ResponseEntity<Page<CardDto>> getUserCards(@AuthenticationPrincipal Jwt jwt,
-                                                      @PageableDefault(size = 6) Pageable pageable) {
+                                                      @PageableDefault(size = 6, sort = "balance") Pageable pageable) {
         Long userId = Long.valueOf(jwt.getSubject());
         return ResponseEntity.ok(
                 cardService.getUserCardsPaginated(userId, pageable).map(cardDtoFactory::createCardDtoForUser));
-    }
-
-    @GetMapping("/by-number")
-    public ResponseEntity<CardDto> getCardByCardNumber(@AuthenticationPrincipal Jwt jwt,
-                                                       @CreditCardNumber @RequestParam("number") String number) {
-        Long userId = Long.valueOf(jwt.getSubject());
-        return ResponseEntity.ok(cardDtoFactory
-                .createCardDtoForUser(cardService.findCardByCardNumberAndUserId(userId, number)));
     }
 }
 

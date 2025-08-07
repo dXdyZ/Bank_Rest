@@ -9,6 +9,7 @@ import com.example.bank_rest_test_task.exception.InsufficientFundsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -41,6 +42,7 @@ public class PaymentService {
                         .amount(paymentDto.amount())
                         .user(fromCard.getUser())
                         .comment(paymentDto.comment())
+                        .timestamp(OffsetDateTime.now())
                 .build());
         cardService.saveCard(fromCard);
         cardService.saveCard(toCard);

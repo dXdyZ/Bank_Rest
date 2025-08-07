@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
@@ -20,14 +21,15 @@ public interface CardBlockRequestRepository extends JpaRepository<CardBlockReque
             "where (:blockRequestStatus is null or c.blockRequestStatus = :blockRequestStatus) " +
             "and (:requesterId is null or c.requester.id = :requesterId) " +
             "and (:searchHash is null or c.card.searchHash = :searchHash) " +
-            "and (:createStartDate is null or c.createAt >= :createStartDate) " +
-            "and (:createEndDate is null or c.createAt <= :createEndDate)")
+            "and c.createAt >= coalesce(:createStartDate, c.createAt) " +
+            "and c.createAt <= coalesce(:createEndDate, c.createAt)")
     Page<CardBlockRequest> findFilterCardBlockRequest(@Param("blockRequestStatus") BlockRequestStatus blockRequestStatus,
                                                       @Param("requesterId") Long requesterId,
                                                       @Param("searchHash") String searchHash,
                                                       @Param("createStartDate") OffsetDateTime createStartDate,
                                                       @Param("createEndDate") OffsetDateTime createEndDate,
                                                       Pageable pageable);
+    @EntityGraph(attributePaths = {"card", "requester", "processedBy"})
     Page<CardBlockRequest> findAllByProcessedBy_Id(Long processedById, Pageable pageable);
 }
 

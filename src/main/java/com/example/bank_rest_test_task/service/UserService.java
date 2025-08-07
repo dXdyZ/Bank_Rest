@@ -6,6 +6,8 @@ import com.example.bank_rest_test_task.entity.UserRole;
 import com.example.bank_rest_test_task.exception.DuplicateUserException;
 import com.example.bank_rest_test_task.exception.UserNotFoundException;
 import com.example.bank_rest_test_task.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,5 +86,9 @@ public class UserService {
     public User findUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User by id: %s not found".formatted(id)));
+    }
+
+    public Page<User> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 }

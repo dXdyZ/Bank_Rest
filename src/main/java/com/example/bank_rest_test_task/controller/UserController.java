@@ -1,5 +1,6 @@
 package com.example.bank_rest_test_task.controller;
 
+import com.example.bank_rest_test_task.controller.documentation.UserControllerDocs;
 import com.example.bank_rest_test_task.dto.UserDto;
 import com.example.bank_rest_test_task.dto.UserRegisterDto;
 import com.example.bank_rest_test_task.dto.UserRoleUpdateDto;
@@ -9,6 +10,9 @@ import com.example.bank_rest_test_task.util.factory.UserDtoFactory;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @RestController
 @RequestMapping("/users")
-public class UserController {
+public class UserController implements UserControllerDocs {
     private final UserService userService;
     private final UserDtoFactory userDtoFactory;
 
@@ -30,6 +34,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public void registerUser(@Valid @RequestBody UserRegisterDto userRegisterDto) {
         userService.registrationUser(userRegisterDto);
+    }
+
+    @GetMapping()
+    public ResponseEntity<Page<UserDto>> getAllUser(@PageableDefault(size = 6, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(userService.findAll(pageable).map(userDtoFactory::createUserDtoAndCardDtoForAdmin));
     }
 
     @GetMapping("/by-username/{username}")

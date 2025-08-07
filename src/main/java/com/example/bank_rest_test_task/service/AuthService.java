@@ -16,7 +16,7 @@ public class AuthService {
         this.tokenService = tokenService;
     }
 
-    public JwtTokenDto loing(String username, String password) {
+    public JwtTokenDto login(String username, String password) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -32,5 +32,9 @@ public class AuthService {
         } catch (BadCredentialsException e) {
             throw new AuthenticationFailedException("Invalid username or password");
         }
+    }
+
+    public JwtTokenDto refreshAccessToken(String refreshToken) throws AuthenticationFailedException{
+        return tokenService.refreshAccessToken(refreshToken);
     }
 }

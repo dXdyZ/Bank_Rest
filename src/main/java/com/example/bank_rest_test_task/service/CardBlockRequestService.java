@@ -77,7 +77,7 @@ public class CardBlockRequestService {
                                                              OffsetDateTime createEndDate,
                                                              Pageable pageable) {
         Page<CardBlockRequest> result;
-        if (!cardNumber.isBlank()) {
+        if (cardNumber != null && !cardNumber.isBlank()) {
             result = cardBlockRequestRepository.findFilterCardBlockRequest(blockRequestStatus, requesterId,
                     cryptoService.calculationCardHash(cardNumber), createStartDate, createEndDate, pageable);
         } else {

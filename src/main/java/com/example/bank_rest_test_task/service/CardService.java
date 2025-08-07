@@ -39,6 +39,7 @@ public class CardService {
                 .user(user)
                 .validityPeriod(cardCreateDto.validityPeriod())
                 .searchHash(cryptoService.calculationCardHash(cardCreateDto.cardNumber()))
+                .statusCard(StatusCard.ACTIVE)
                 .build();
         cardRepository.save(card);
     }
@@ -64,7 +65,7 @@ public class CardService {
     }
 
     public Card findCardByNumber(String cardNumber) {
-        return cardRepository.findByEncryptNumber(cryptoService.calculationCardHash(cardNumber))
+        return cardRepository.findBySearchHash(cryptoService.calculationCardHash(cardNumber))
                 .orElseThrow(() -> new CardNotFoundException("Card by: %s not found"
                         .formatted(CardFormattedService.formatedMaskedCard(cardNumber))));
     }
@@ -104,6 +105,9 @@ public class CardService {
         return cardRepository.findByUser_Username(username, pageable);
     }
 
+    public Page<Card> findAllCards(Pageable pageable) {
+        return cardRepository.findAll(pageable);
+    }
 }
 
 

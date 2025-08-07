@@ -31,7 +31,7 @@ public class User {
     private UserRole role;
 
     @Builder.Default
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Card> cards = new ArrayList<>();
 
     @Builder.Default

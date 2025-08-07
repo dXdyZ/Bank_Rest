@@ -39,4 +39,18 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
         return customUserDetails;
     }
+
+    public UserDetails loadUserById(Long id) throws UsernameNotFoundException {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new UsernameNotFoundException("User not found"));
+
+        return new CustomUserDetails(
+                user.getId(),
+                user.getUsername(),
+                user.getPassword(),
+                List.of(new SimpleGrantedAuthority(user.getRole().name())),
+                user.getAccountEnable(),
+                user.getAccountLocked()
+        );
+    }
 }

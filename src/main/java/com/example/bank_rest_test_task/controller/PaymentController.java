@@ -1,11 +1,14 @@
 package com.example.bank_rest_test_task.controller;
 
+import com.example.bank_rest_test_task.controller.documentation.PaymentControllerDocs;
 import com.example.bank_rest_test_task.dto.CardDto;
 import com.example.bank_rest_test_task.dto.PaymentDto;
 import com.example.bank_rest_test_task.service.PaymentService;
 import com.example.bank_rest_test_task.util.factory.CardDtoFactory;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.example.bank_rest_test_task.security.CustomUserDetails;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/payments")
-public class PaymentController {
+public class PaymentController implements PaymentControllerDocs {
     private final PaymentService paymentService;
     private final CardDtoFactory cardDtoFactory;
 

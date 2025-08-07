@@ -14,19 +14,21 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import com.example.bank_rest_test_task.security.jwt.JwtKeyConfiguration;
 
 import java.security.KeyPair;
 import java.security.interfaces.RSAPublicKey;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private final KeyPair keyPair;
 
-    public SecurityConfig(KeyPair keyPair) {
-        this.keyPair = keyPair;
+    private final JwtKeyConfiguration jwtKeyConfiguration;
+
+    public SecurityConfig(JwtKeyConfiguration jwtKeyConfiguration) {
+        this.jwtKeyConfiguration = jwtKeyConfiguration;
     }
+    
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -40,19 +42,25 @@ public class SecurityConfig {
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/auth/login"
-                        ).permitAll()
-                        .requestMatchers(
-                                "/cards/"
-                        ).hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(
-                                "/users/**",
-                                "/error"
-                        ).hasRole("ADMIN")
+                        .requestMatchers("/auth/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml",
+                                "/swagger-resources/**",
+                                "/webjars/**").permitAll()
+                        .requestMatchers("/admin/cards/**").hasRole("ADMIN")
+                        .requestMatchers("/users/**").hasRole("ADMIN")
+                        .requestMatchers("/blocks/process", "/blocks/filter", "/blocks/processed-by/**", "/blocks/{id}").hasRole("ADMIN")
+                        .requestMatchers("/cards/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/payments/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/blocks").hasAnyRole("USER", "ADMIN")
+                        .anyRequest().authenticated()
                 )
+                
                 .build();
     }
+
 
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
@@ -63,14 +71,17 @@ public class SecurityConfig {
         return jwtAuthenticationConverter;
     }
 
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        try {
+            return NimbusJwtDecoder.withPublicKey((RSAPublicKey) jwtKeyConfiguration.keyPair().getPublic()).build();
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to load public key for JWT decoding", e);
+        }
+    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
         return config.getAuthenticationManager();
-    }
-
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withPublicKey((RSAPublicKey) keyPair.getPublic()).build();
     }
 }
